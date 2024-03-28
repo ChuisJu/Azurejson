@@ -1,0 +1,137 @@
+{
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers",
+      "name": "sql-server",
+      "properties": {
+        "version": "latest"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "web-server1",
+      "properties": {
+        "vmSize": "Standard_D2_v3",
+        "osProfile": {
+          "computerName": "web-server1",
+          "adminUsername": "azureuser",
+          "adminPassword": "yourAdminPassword"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "web-server2",
+      "properties": {
+        "vmSize": "Standard_D2_v3",
+        "osProfile": {
+          "computerName": "web-server2",
+          "adminUsername": "azureuser",
+          "adminPassword": "yourAdminPassword"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/firewalls",
+      "name": "firewall-ips",
+      "properties": {
+        "rule1": "AllowHTTP",
+        "rule2": "AllowHTTPS"
+      }
+    },
+    {
+      "type": "Microsoft.Security/intrusionDetectionSystems",
+      "name": "ips-policy",
+      "properties": {
+        "enabled": true
+      }
+    },
+    {
+      "type": "Microsoft.Network/applicationGateways",
+      "name": "reverse-proxy-waf",
+      "properties": {
+        "backendAddressPool": ["web-server1", "web-server2"],
+        "httpSettings": {
+          "port": 80
+        },
+        "firewallPolicy": "waf-policy"
+      }
+    },
+    {
+      "type": "Microsoft.Security/webApplicationFirewalls",
+      "name": "waf-policy",
+      "properties": {
+        "mode": "Prevention"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "virtual-network",
+      "properties": {
+        "addressSpace": ["10.0.0.0/16"],
+        "subnets": [
+          {
+            "name": "web-subnet",
+            "addressPrefix": "10.0.1.0/24"
+          },
+          {
+            "name": "sql-subnet",
+            "addressPrefix": "10.0.2.0/24"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "web-nic1",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "web-ip1",
+            "subnet": "web-subnet"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "web-nic2",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "web-ip2",
+            "subnet": "web-subnet"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "sql-nic",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "sql-ip",
+            "subnet": "sql-subnet"
+          }
+        ]
+      }
+    }
+  ]
+}
